@@ -37,13 +37,13 @@ curl -sS https://mcp.edgelab.space/mcp \
     "id": 2,
     "method": "tools/call",
     "params": {
-      "name": "search_knowledge",
-      "arguments": { "query": "telegram бот на claude code" }
+      "name": "search_library",
+      "arguments": { "query": "telegram бот на claude code", "limit": 10 }
     }
   }'
 ```
 
-## Карточка по slug
+## Полный материал по slug
 
 ```bash
 curl -sS https://mcp.edgelab.space/mcp \
@@ -55,11 +55,15 @@ curl -sS https://mcp.edgelab.space/mcp \
     "id": 3,
     "method": "tools/call",
     "params": {
-      "name": "get_entry",
-      "arguments": { "slug": "your-entry-slug" }
+      "name": "get_material",
+      "arguments": { "slug": "your-material-slug" }
     }
   }'
 ```
+
+`get_material` возвращает полную карточку: цель, результат, статью, копируемый
+промпт скилла (`agent_prompt`), видео, таймкодный транскрипт, шаги и дочерние
+уроки.
 
 ## Доступные инструменты
 
@@ -67,11 +71,11 @@ curl -sS https://mcp.edgelab.space/mcp \
 
 | Инструмент | Аргументы |
 |---|---|
-| `search_knowledge` | `query` |
-| `get_entry` | `slug` |
-| `list_latest_drops` | `limit` (по умолчанию 10) |
-| `get_digest` | `limit` (по умолчанию 5) |
-| `list_categories` | — |
+| `list_library` | `category?` (lesson / skill / usecase / live / workshop / guide), `limit` |
+| `search_library` | `query`, `limit` |
+| `get_material` | `slug` |
+| `list_hub_questions` | `query?`, `category?`, `limit`, `offset` |
+| `get_hub_question` | `question_id` |
 
 Полное описание — в [MCP.md](MCP.md).
 
