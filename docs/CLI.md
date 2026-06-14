@@ -1,17 +1,78 @@
 # CLI / curl — доступ без MCP-клиента
 
-MCP-сервер EdgeLab Space работает stateless и отвечает обычным JSON-RPC, поэтому
-его инструменты можно вызывать прямой строкой `curl` — без MCP-клиента. Удобно
-для скриптов, cron-задач и быстрой проверки.
+Если у вас нет MCP-клиента, библиотеку EdgeLab Space можно дёргать прямой строкой
+`curl` — для скриптов, cron-задач, ботов и быстрой проверки. Есть два пути.
 
-- Эндпоинт: `https://mcp.edgelab.space/mcp`
-- Аутентификация: `Authorization: Bearer edgelabspace_...`
-- Тот же ключ `edgelabspace_...` из кабинета, что и для MCP-клиента.
+- **REST API** — простой и основной путь: обычные `GET`-запросы и JSON-ответы,
+  никакого JSON-RPC. Рекомендуется для нового кода. Полный справочник —
+  [REST.md](REST.md).
+- **JSON-RPC через MCP** — запасной путь для инструментов, которые уже умеют
+  говорить с MCP-сервером по JSON-RPC.
 
-Каждый вызов — один POST с JSON-RPC телом. Заголовок `Accept` должен принимать
+Оба используют один персональный ключ `edgelabspace_...` из кабинета на
+`platform.edgelab.space/agent-identity` и заголовок
+`Authorization: Bearer edgelabspace_...`. Заголовок `Accept` должен принимать
 `application/json`.
 
-## Список инструментов
+Не оставляйте ключ в истории shell и не коммитьте в репозитории — держите его
+в переменной окружения и подставляйте через
+`-H "Authorization: Bearer $EDGELAB_KEY"`.
+
+## Через REST (рекомендуется)
+
+База — `https://mcp.edgelab.space/v1`. Все запросы — обычные `GET`, ответ — конверт
+`{"data": ..., "meta": ...}`. Подробно — в [REST.md](REST.md).
+
+### Список материалов
+
+```bash
+curl -sS "https://mcp.edgelab.space/v1/library?category=skill&limit=10" \
+  -H "Authorization: Bearer edgelabspace_YOUR_KEY" \
+  -H "Accept: application/json"
+```
+
+### Поиск по библиотеке
+
+```bash
+curl -sS "https://mcp.edgelab.space/v1/library/search?q=telegram%20бот%20на%20claude%20code&limit=10" \
+  -H "Authorization: Bearer edgelabspace_YOUR_KEY" \
+  -H "Accept: application/json"
+```
+
+### Полный материал по slug
+
+```bash
+curl -sS https://mcp.edgelab.space/v1/library/materials/your-material-slug \
+  -H "Authorization: Bearer edgelabspace_YOUR_KEY" \
+  -H "Accept: application/json"
+```
+
+Ответ несёт полную карточку: цель, результат, статью, копируемый промпт скилла
+(`agent_prompt`), видео, таймкодный транскрипт, шаги и дочерние уроки.
+
+### Проверка
+
+```bash
+curl -sS "https://mcp.edgelab.space/v1/library?limit=5" \
+  -H "Authorization: Bearer edgelabspace_YOUR_KEY" \
+  -H "Accept: application/json"
+```
+
+Непустой список подтверждает, что ключ принят и подписка активна. Полный список
+эндпоинтов (`/hub/questions`, `/digests`, …) — в [REST.md](REST.md).
+
+## Через MCP (JSON-RPC) — запасной путь
+
+MCP-сервер EdgeLab Space работает stateless и отвечает обычным JSON-RPC, поэтому
+его инструменты можно вызывать тем же `curl`. Подходит инструментам, которые уже
+говорят с сервером по JSON-RPC.
+
+- Эндпоинт: `https://mcp.edgelab.space/mcp`
+- Аутентификация: `Authorization: Bearer edgelabspace_...` (тот же ключ)
+
+Каждый вызов — один `POST` с JSON-RPC телом.
+
+### Список инструментов
 
 ```bash
 curl -sS https://mcp.edgelab.space/mcp \
@@ -25,7 +86,7 @@ curl -sS https://mcp.edgelab.space/mcp \
   }'
 ```
 
-## Поиск по библиотеке
+### Поиск по библиотеке
 
 ```bash
 curl -sS https://mcp.edgelab.space/mcp \
@@ -43,7 +104,7 @@ curl -sS https://mcp.edgelab.space/mcp \
   }'
 ```
 
-## Полный материал по slug
+### Полный материал по slug
 
 ```bash
 curl -sS https://mcp.edgelab.space/mcp \
@@ -65,9 +126,7 @@ curl -sS https://mcp.edgelab.space/mcp \
 промпт скилла (`agent_prompt`), видео, таймкодный транскрипт, шаги и дочерние
 уроки.
 
-## Доступные инструменты
-
-Те же, что и в MCP-клиенте:
+### Доступные инструменты
 
 | Инструмент | Аргументы |
 |---|---|
@@ -79,11 +138,14 @@ curl -sS https://mcp.edgelab.space/mcp \
 | `list_digests` | `period?`, `date?`, `from_?`, `to?`, `last_n_days?` |
 | `get_digest` | `period?`, `date?`, `from_?`, `to?`, `last_n_days?` |
 
-Полное описание — в [MCP.md](MCP.md).
+Полное описание инструментов — в [MCP.md](MCP.md).
 
 ## Подсказки
 
 - Замените `edgelabspace_YOUR_KEY` на свой ключ из кабинета. Не оставляйте его
   в истории shell и не коммитьте в репозитории — лучше держать в переменной
-  окружения и подставлять через `-H "Authorization: Bearer $EDGELAB_MCP_KEY"`.
-- `Unauthorized` в ответе означает неверный ключ или неактивную подписку.
+  окружения и подставлять через `-H "Authorization: Bearer $EDGELAB_KEY"`.
+- `401` (REST: `unauthorized`; MCP: `Unauthorized`) означает неверный ключ или
+  неактивную подписку.
+- Есть MCP-нативный клиент (Claude Code, Codex, cowork, Cursor)? Подключите тот
+  же сервер заголовком — инструменты появятся как нативные. См. [MCP.md](MCP.md).
