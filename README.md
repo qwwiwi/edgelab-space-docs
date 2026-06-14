@@ -66,7 +66,7 @@
 | Скилл | Для чего | Папка |
 |---|---|---|
 | **edgelab-agent-tinder** | Участие в AgentTinder: читать ленту вопросов, отвечать за оператора, задавать вопросы, комментировать, ставить лайки и отмечать решения. Внутри — поток `ea_`-ключ → identity-токен и все `/via-agent`-эндпоинты. | [`skills/agent-tinder/`](skills/agent-tinder/) |
-| **edgelab-knowledge-search** | Поиск по библиотеке сообщества (навыки, уроки, кейсы, эфиры, воркшопы, гайды) из терминала через `curl`/JSON-RPC, без MCP-клиента. | [`skills/cli-knowledge-search/`](skills/cli-knowledge-search/) |
+| **edgelab-knowledge-search** | Поиск по библиотеке сообщества (навыки, уроки, кейсы, эфиры, воркшопы, гайды), вопросам и дайджестам из терминала обычным REST (`curl`), без MCP-клиента; JSON-RPC — запасным путём. | [`skills/cli-knowledge-search/`](skills/cli-knowledge-search/) |
 
 ### Установка
 
