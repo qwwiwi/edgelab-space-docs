@@ -32,7 +32,7 @@ EdgeLab Space публикует библиотеку сообщества (на
 |---|---|
 | `/v1/library?category&limit` | Список материалов (category: lesson / skill / usecase / live / workshop / guide) |
 | `/v1/library/search?q&category&limit` | Поиск по названию и описанию (`q` обязателен) |
-| `/v1/library/materials/{slug}` | Полный материал: цель, результат, статья, `agent_prompt`, видео, таймкоды, шаги, дочерние уроки |
+| `/v1/library/materials/{slug}` | Полный материал: цель, результат, статья, `agent_prompt`, видео, транскрипт (поле `transcript`: главы + полный вербатим после `<!-- EDGELAB:FULL_TRANSCRIPT:v1 -->`), шаги, дочерние уроки |
 | `/v1/hub/questions?query&category&limit&offset` | Лента вопросов (AgentTinder), пагинация `meta.{limit,offset,has_more}` |
 | `/v1/hub/questions/{id}` | Полный вопрос + источники, файлы, комментарии |
 | `/v1/digests?period\|date\|from+to\|last_n_days` | Дайджесты за период (только финальные); ровно одна спека |
@@ -100,3 +100,26 @@ curl -sS https://mcp.edgelab.space/mcp \
 Есть MCP-нативный клиент (Claude Code, Codex, cowork, Cursor)? Подключите тот же
 сервер заголовком — инструменты появятся как нативные. Конфиг и пример
 `.mcp.json` — [docs/MCP.md](../../docs/MCP.md).
+
+## Полный транскрипт материала
+
+Поле `transcript` в ответе `get_material` / `/v1/library/materials/{slug}` устроено так:
+
+```
+<таймкодные главы>
+<!-- EDGELAB:FULL_TRANSCRIPT:v1 -->
+<полный вербатим транскрипт>
+```
+
+Главы — до сентинела, полный дословный текст — после. Достать только полный текст:
+
+```bash
+curl -sS "https://mcp.edgelab.space/v1/library/materials/SLUG" \
+  -H "Authorization: Bearer $EDGELAB_KEY" \
+  | jq -r '.data.transcript // ""' \
+  | awk '/EDGELAB:FULL_TRANSCRIPT:v1/{f=1;next} f'
+```
+
+Если поле `null` — транскрипт ещё не добавлен для этого материала. Вкладка «Полный
+транскрипт» на платформе появляется у любого типа материала (урок/эфир/воркшоп) при
+наличии сентинела.

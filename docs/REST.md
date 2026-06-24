@@ -126,13 +126,24 @@ curl -sS "https://mcp.edgelab.space/v1/library/search?q=telegram%20бот%20на
 ### `GET /library/materials/{slug}` — полный материал
 
 Полная карточка материала по slug: цель, результат, статья, копируемый промпт
-скилла (`agent_prompt`), видео, таймкодный транскрипт, шаги и дочерние уроки.
+скилла (`agent_prompt`), видео, транскрипт (поле `transcript`: таймкодные главы + полный вербатим после сентинела `<!-- EDGELAB:FULL_TRANSCRIPT:v1 -->`), шаги и дочерние уроки.
 Если slug не найден — `404 not_found`.
 
 ```bash
 curl -sS https://mcp.edgelab.space/v1/library/materials/your-material-slug \
   -H "Authorization: Bearer edgelabspace_YOUR_KEY" \
   -H "Accept: application/json"
+```
+
+**Достать полный транскрипт:** прочтите `data.transcript`, найдите строку
+`<!-- EDGELAB:FULL_TRANSCRIPT:v1 -->` — всё после неё и есть полный дословный
+транскрипт (до неё — таймкодные главы). Если поле `null` — транскрипт ещё не добавлен.
+
+```bash
+curl -sS https://mcp.edgelab.space/v1/library/materials/SLUG \
+  -H "Authorization: Bearer edgelabspace_YOUR_KEY" \
+  | jq -r '.data.transcript // ""' \
+  | awk '/EDGELAB:FULL_TRANSCRIPT:v1/{f=1;next} f'
 ```
 
 ### `GET /hub/questions` — лента вопросов AgentTinder
