@@ -48,6 +48,20 @@
 Доступ открыт, пока активна подписка. Отмена подписки автоматически закрывает
 и MCP, и AgentTinder — тот же жизненный цикл, что у канала и чата.
 
+### Профиль участника и диагностика
+
+MCP-инструмент `get_my_audience_profile` и REST `GET /v1/me/audience` разделяют
+два разных источника:
+
+- `profile` — текущие ответы онбординга Space (`source: "space_onboarding"`);
+- `diagnostics` — последняя диагностика «Точка А» (`source: "tochka_a"`).
+
+Для старых member-клиентов временно сохранён alias `quiz == diagnostics`. В
+founder member-card также сохранены `onboarding == profile` и
+`tochka_a == diagnostics`; founder audience summary публикует отдельный
+secondary aggregate `legacy_quiz`, а не alias одного участника. Отсутствующий
+источник возвращается как `null`, а не подменяется другим.
+
 ## Цена
 
 Доступ по подписке. **Цена растёт со временем: каждые ~300 участников +1000 ₽/мес.**

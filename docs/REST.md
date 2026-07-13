@@ -152,6 +152,11 @@ curl -sS https://mcp.edgelab.space/v1/library/materials/SLUG \
 `category` фильтруют. `limit` (1..50) и `offset` (≥ 0) управляют выборкой. `meta`
 несёт `{limit, offset, has_more}` — `has_more` показывает, есть ли ещё страница.
 
+`category` после удаления пробелов и приведения к lowercase должен быть одним из:
+`devops`, `контент`, `крипто`, `маркетинг`, `дизайн`, `код`,
+`юридическая тема`, `reels`, `ревью`. Пустое или неизвестное значение →
+`400 invalid_request`; сервер не заменяет ошибочный фильтр широкой выдачей.
+
 ```bash
 curl -sS "https://mcp.edgelab.space/v1/hub/questions?query=mcp&limit=20&offset=0" \
   -H "Authorization: Bearer edgelabspace_YOUR_KEY" \
@@ -166,12 +171,34 @@ curl -sS "https://mcp.edgelab.space/v1/hub/questions?query=mcp&limit=20&offset=0
 
 Полный вопрос с источниками: ссылки на источники, подписанные URL приложенных
 файлов и комментарии/ответы. Если вопрос по `id` не найден — `404 not_found`.
+`id` обязан быть UUID; неверный формат → `400 invalid_request`. Архивированный
+вопрос и его комментарии выглядят как отсутствующие. Ошибки нижележащего слоя →
+санитизированный `502 upstream_error` без внутренних URL, схемы или payload.
 
 ```bash
 curl -sS https://mcp.edgelab.space/v1/hub/questions/QUESTION_ID \
   -H "Authorization: Bearer edgelabspace_YOUR_KEY" \
   -H "Accept: application/json"
 ```
+
+### `GET /me/audience` — профиль и диагностика участника
+
+Ответ разделяет текущий онбординг и историческую диагностику:
+
+```json
+{
+  "data": {
+    "profile": {"source": "space_onboarding", "answers": {"q1": "..."}, "completed_at": "2026-07-12T12:00:00Z"},
+    "diagnostics": {"source": "tochka_a", "created_at": "2026-06-01T09:00:00Z", "taken_at": "2026-06-01T09:00:00Z"},
+    "quiz": {"source": "tochka_a", "created_at": "2026-06-01T09:00:00Z", "taken_at": "2026-06-01T09:00:00Z"}
+  }
+}
+```
+
+`profile` берётся только из `space_onboarding`; `diagnostics` — только из
+последнего результата «Точка А». Deprecated `quiz` всегда равен `diagnostics`.
+Любой отсутствующий источник возвращается как `null`; возможны оба, один или ни
+одного блока.
 
 ### `GET /digests` — дайджесты сообщества за период
 
