@@ -56,10 +56,11 @@ MCP-инструмент `get_my_audience_profile` и REST `GET /v1/me/audience`
 - `profile` — текущие ответы онбординга Space (`source: "space_onboarding"`);
 - `diagnostics` — последняя диагностика «Точка А» (`source: "tochka_a"`).
 
-Для старых клиентов временно сохранён alias `quiz == diagnostics`. В founder
-ответах также сохранены `onboarding == profile`, `tochka_a == diagnostics` и
-`legacy_quiz == diagnostics`. Отсутствующий источник возвращается как `null`, а
-не подменяется другим.
+Для старых member-клиентов временно сохранён alias `quiz == diagnostics`. В
+founder member-card также сохранены `onboarding == profile` и
+`tochka_a == diagnostics`; founder audience summary публикует отдельный
+secondary aggregate `legacy_quiz`, а не alias одного участника. Отсутствующий
+источник возвращается как `null`, а не подменяется другим.
 
 ## Цена
 
