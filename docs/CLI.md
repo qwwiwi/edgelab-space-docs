@@ -135,6 +135,8 @@ curl -sS https://mcp.edgelab.space/mcp \
 | `get_material` | `slug` |
 | `list_hub_questions` | `query?`, `category?`, `limit`, `offset` |
 | `get_hub_question` | `question_id` |
+| `get_my_audience_profile` | — (ваш профиль онбординга + «Точка А») |
+| `get_my_feedback` | `limit` (ваши оценки уроков + NPS, до 100) |
 | `list_digests` | `period?`, `date?`, `from_?`, `to?`, `last_n_days?` |
 | `get_digest` | `period?`, `date?`, `from_?`, `to?`, `last_n_days?` |
 
